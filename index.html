@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>⛏️ MineSafe - Coal Mine Safety Monitoring &amp; Alert System</title>
+    <meta name="description" content="Coal Mine Safety Monitoring &amp; Alert System. Real-time atmospheric hazards tracking, RFID personnel accounting, and emergency zone evacuation alerts." />
+    <meta property="og:title" content="⛏️ MineSafe - Coal Mine Safety Monitoring &amp; Alert System" />
+    <meta property="og:description" content="Coal Mine Safety Monitoring &amp; Alert System. Real-time atmospheric hazards tracking, RFID personnel accounting, and emergency zone evacuation alerts." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Google Fonts for precision typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+
+    <!-- APP WRAPPER -->
+    <div class="app-layout">
+      
+      <!-- ====================================================================
+           DESKTOP SIDEBAR (Visible >= 900px)
+           ==================================================================== -->
+      <aside class="sidebar">
+        
+        <!-- Sidebar Brand -->
+        <a href="#dashboard" class="sidebar-brand" data-nav-target="dashboard">
+          <div class="sidebar-icon">⛏️</div>
+          <div>
+            <div class="sidebar-title">MineSafe</div>
+            <div class="sidebar-sub">Coal Mine Safety System</div>
+          </div>
+        </a>
+
+        <!-- 4 Primary Navigation Links -->
+        <nav class="sidebar-nav">
+          <button class="sidebar-nav-btn active" data-nav-target="dashboard">
+            <span style="font-size: 1.15rem;">📊</span>
+            <span>Dashboard</span>
+          </button>
+          
+          <button class="sidebar-nav-btn" data-nav-target="workers">
+            <span style="font-size: 1.15rem;">👷</span>
+            <span>Workers</span>
+          </button>
+          
+          <button class="sidebar-nav-btn" data-nav-target="areas">
+            <span style="font-size: 1.15rem;">🗺️</span>
+            <span>Mine Areas</span>
+          </button>
+          
+          <button class="sidebar-nav-btn" data-nav-target="alerts">
+            <span style="font-size: 1.15rem;">⚠️</span>
+            <span>Alerts</span>
+            <span class="sidebar-badge" style="display: none;">0</span>
+          </button>
+        </nav>
+
+        <!-- Sidebar Footer Actions -->
+        <div class="sidebar-footer">
+          <button id="btnQuickRfid" class="btn btn-secondary btn-sm" style="width: 100%;">
+            ⚡ Simulate RFID Scan
+          </button>
+          <button id="btnAioConfig" class="btn btn-secondary btn-sm" style="width: 100%;">
+            ⚙️ Adafruit IO Setup
+          </button>
+          <div style="font-size: 0.6875rem; color: var(--text-dim); text-align: center;">
+            College Engineering Project &middot; ECE/IoT
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- ====================================================================
+           MAIN CONTENT VIEWPORT
+           ==================================================================== -->
+      <div class="main-viewport">
+        
+        <!-- Top Navigation Bar -->
+        <header class="top-nav">
+          <div class="top-nav-inner">
+            
+            <div class="brand-wrap">
+              <span class="brand-icon">⛏️</span>
+              <div>
+                <h1 class="brand-name">MineSafe</h1>
+                <p class="brand-sub">Coal Mine Safety Monitoring &amp; Alert System</p>
+              </div>
+            </div>
+
+            <!-- Top Actions & Online Indicator -->
+            <div class="top-actions">
+              <span id="systemOnlinePill" class="status-pill">
+                <span class="status-dot pulsing"></span>
+                <span>🟢 System Online</span>
+              </span>
+
+              <button id="btnDemoHazard" class="btn btn-secondary btn-sm" title="Toggle college presentation hazard simulation">
+                <span>⚡ Test Hazard Sim</span>
+              </button>
+            </div>
+
+          </div>
+        </header>
+
+        <!-- CONTAINER BODY -->
+        <div class="container">
+
+          <!-- ================================================================
+               SECTION 1: DASHBOARD
+               ================================================================ -->
+          <section id="view-dashboard" class="view-section active">
+
+            <!-- Active Alert Card (Top priority if problem exists) -->
+            <div id="activeAlertHero" class="alert-card-hero safe">
+              <div class="alert-hero-top">
+                <div class="alert-hero-title" style="color: var(--color-safe);">
+                  <span>🟢 No active alerts</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Sensors operating within normal parameters</span>
+              </div>
+              <div class="alert-hero-msg" style="font-size: 0.8125rem; color: var(--text-muted);">
+                Continuous ventilation and atmosphere telemetry nominal across all 5 monitored mining sectors.
+              </div>
+            </div>
+
+            <!-- Two Hero Metric Cards: People Counter + Overall Safety Status -->
+            <div class="hero-cards-grid">
+              
+              <!-- CARD 1: PEOPLE COUNTER -->
+              <div class="hero-card">
+                <div>
+                  <div class="hero-card-header">
+                    <span class="hero-card-label">
+                      <span>👷</span>
+                      <span>PEOPLE INSIDE MINE</span>
+                    </span>
+                    <button class="btn btn-secondary btn-sm" onclick="window.switchTab('workers')">
+                      Manage Workers
+                    </button>
+                  </div>
+                  
+                  <div class="hero-card-value font-mono tabular-nums">
+                    <span id="peopleInsideCount">24</span>
+                    <span style="font-size: 1rem; font-weight: 600; color: var(--text-muted);">Personnel</span>
+                  </div>
+                </div>
+
+                <div class="hero-card-substats">
+                  <div class="substat-item">People IN: <strong id="subPeopleIn" class="font-mono">24</strong></div>
+                  <div class="substat-item">People OUT: <strong id="subPeopleOut" class="font-mono">8</strong></div>
+                  <div class="substat-item">Active Sectors: <strong class="font-mono">4</strong></div>
+                </div>
+              </div>
+
+              <!-- CARD 2: OVERALL SAFETY STATUS -->
+              <div id="overallStatusCard" class="hero-card status-card state-normal">
+                <div>
+                  <div class="hero-card-header">
+                    <span class="hero-card-label">
+                      <span>🛡️</span>
+                      <span>OVERALL SAFETY STATUS</span>
+                    </span>
+                    <span style="font-size: 0.6875rem; color: var(--text-dim);">Automated Logic</span>
+                  </div>
+
+                  <div id="overallStatusText" class="hero-card-value font-mono">
+                    🟢 NORMAL
+                  </div>
+                </div>
+
+                <div class="hero-card-substats">
+                  <span id="overallStatusSub" style="color: var(--text-muted);">
+                    All monitored coal mine areas operating safely.
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ================================================================
+                 EMERGENCY ALERT SECTION (NORMAL & ACTIVE EMERGENCY MODES)
+                 ================================================================ -->
+            <div id="emergencyAlertCard" class="emergency-alert-card state-normal">
+              
+              <!-- NORMAL STATE: Green Large Emergency Alert Button -->
+              <div id="emergencyNormalContainer" class="emergency-normal-view">
+                <div class="emergency-normal-info">
+                  <div class="emergency-badge-tag">
+                    <span class="emergency-pulse-dot green"></span>
+                    <span>MINE SAFETY &amp; EVACUATION PROTOCOL</span>
+                  </div>
+                  <h3 class="emergency-normal-title">Mine-Wide Emergency Alert</h3>
+                  <p class="emergency-normal-desc">
+                    Press to immediately trigger site emergency sirens, alert deep extraction shafts, and commence personnel evacuation.
+                  </p>
+                </div>
+                
+                <button id="btnTriggerEmergency" class="btn-emergency-main" aria-label="Activate Emergency Alert">
+                  <span class="btn-em-status-icon">🟢</span>
+                  <div class="btn-em-text-wrap">
+                    <span class="btn-em-headline">EMERGENCY ALERT</span>
+                    <span class="btn-em-subline">Click to sound alarm &amp; start evacuation</span>
+                  </div>
+                </button>
+              </div>
+
+              <!-- ACTIVE EMERGENCY STATE: Standout Red Card, Alarms, Live Telemetry -->
+              <div id="emergencyActiveContainer" class="emergency-active-view" style="display: none;">
+                
+                <!-- Red Alert Banner -->
+                <div class="emergency-active-banner">
+                  <div class="emergency-active-header-group">
+                    <div class="emergency-active-badge">
+                      <span class="emergency-pulse-beacon"></span>
+                      <span>🔴 EMERGENCY ACTIVE</span>
+                    </div>
+                    <h2 class="emergency-active-title">🚨 EMERGENCY ALERT ACTIVE</h2>
+                    <blockquote class="emergency-active-callout">
+                      Immediate attention required. Mine-wide evacuation protocol in effect.
+                    </blockquote>
+                  </div>
+
+                  <!-- Sound Alert Status Indicator -->
+                  <div id="emergencySoundStatusPill" class="emergency-sound-pill sounding">
+                    <span class="sound-icon-anim">🔊</span>
+                    <div class="sound-pill-text">
+                      <strong id="emergencySoundStateText">ALARM SOUNDING</strong>
+                      <span id="emergencySoundSubText">Repeating Two-Tone Siren</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Emergency Telemetry Data Grid -->
+                <div class="emergency-data-grid">
+                  
+                  <!-- 1. Current Time & Elapsed Clock -->
+                  <div class="em-metric-tile">
+                    <div class="em-metric-top">
+                      <span class="em-metric-label">⏱️ Current Time</span>
+                      <span id="emElapsedBadge" class="em-metric-tag font-mono">00:00</span>
+                    </div>
+                    <div id="emCurrentTimeVal" class="em-metric-val font-mono">--:--:--</div>
+                    <div class="em-metric-sub">
+                      Triggered at: <span id="emActivationTimestamp" class="font-mono">--:--:--</span>
+                    </div>
+                  </div>
+
+                  <!-- 2. People Inside Mine -->
+                  <div class="em-metric-tile">
+                    <div class="em-metric-top">
+                      <span class="em-metric-label">👷 People Inside Mine</span>
+                      <span class="em-metric-tag alert font-mono">MUSTERING</span>
+                    </div>
+                    <div id="emPeopleInsideCount" class="em-metric-val font-mono text-danger">24</div>
+                    <div class="em-metric-sub">
+                      Total workers to account for
+                    </div>
+                  </div>
+
+                  <!-- 3. Current Mine Safety Status -->
+                  <div class="em-metric-tile">
+                    <div class="em-metric-top">
+                      <span class="em-metric-label">🛡️ Mine Safety Status</span>
+                      <span class="em-metric-tag critical">CRITICAL</span>
+                    </div>
+                    <div id="emSafetyStatusText" class="em-metric-val font-mono text-danger">🔴 DANGER</div>
+                    <div class="em-metric-sub">
+                      Active evacuation mandate
+                    </div>
+                  </div>
+
+                  <!-- 4. Active Sensor Warnings -->
+                  <div class="em-metric-tile">
+                    <div class="em-metric-top">
+                      <span class="em-metric-label">⚠️ Active Sensor Warnings</span>
+                      <span id="emSensorWarningCount" class="em-metric-tag font-mono">Live</span>
+                    </div>
+                    <div id="emSensorWarningsList" class="em-sensor-warnings-list font-mono">
+                      <!-- Dynamically rendered -->
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Number of People in Each Area -->
+                <div class="em-areas-breakdown-card">
+                  <div class="em-areas-header">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <span>🗺️</span>
+                      <strong style="color: #ffffff; font-size: 0.875rem;">Personnel in Each Area</strong>
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">
+                      Verify zero count before clearance
+                    </span>
+                  </div>
+                  
+                  <div id="emAreasListContainer" class="em-areas-pills-row">
+                    <!-- Dynamically populated from appState.areas -->
+                  </div>
+                </div>
+
+                <!-- Emergency Controls: STOP ALARM and CLEAR EMERGENCY -->
+                <div class="emergency-controls-row">
+                  <button id="btnStopAlarm" class="btn-em-control btn-em-stop">
+                    <span class="btn-em-icon">🔇</span>
+                    <div class="btn-em-content">
+                      <strong class="btn-em-main-label">STOP ALARM</strong>
+                      <span class="btn-em-sub-label">Silence sound (emergency stays active)</span>
+                    </div>
+                  </button>
+
+                  <button id="btnClearEmergency" class="btn-em-control btn-em-clear">
+                    <span class="btn-em-icon">✅</span>
+                    <div class="btn-em-content">
+                      <strong class="btn-em-main-label">CLEAR EMERGENCY</strong>
+                      <span class="btn-em-sub-label">Confirm safety &amp; restore normal</span>
+                    </div>
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- Sensor Cards Grid -->
+            <div class="section-heading-wrap">
+              <h3 class="section-heading">
+                <span>📡</span>
+                <span>Atmospheric &amp; Physical Sensors</span>
+              </h3>
+              <span class="section-caption font-mono">Adafruit IO REST Feeds</span>
+            </div>
+
+            <div class="sensors-grid">
+              
+              <!-- 1. Temperature -->
+              <div class="sensor-card">
+                <div class="sensor-card-top">
+                  <span class="sensor-label"><span>🌡</span> Temperature</span>
+                  <span class="sensor-icon">🌡️</span>
+                </div>
+                <div id="sensorTempVal" class="sensor-val tabular-nums font-mono">32.4 °C</div>
+                <div id="sensorTempInd" class="sensor-status-indicator">Safe (&lt; 40°C)</div>
+              </div>
+
+              <!-- 2. Humidity -->
+              <div class="sensor-card">
+                <div class="sensor-card-top">
+                  <span class="sensor-label"><span>💧</span> Humidity</span>
+                  <span class="sensor-icon">💧</span>
+                </div>
+                <div id="sensorHumVal" class="sensor-val tabular-nums font-mono">61 %</div>
+                <div class="sensor-status-indicator">Nominal (40-70%)</div>
+              </div>
+
+              <!-- 3. Gas Level -->
+              <div class="sensor-card">
+                <div class="sensor-card-top">
+                  <span class="sensor-label"><span>⛽</span> Gas Level</span>
+                  <span class="sensor-icon">⛽</span>
+                </div>
+                <div id="sensorGasVal" class="sensor-val tabular-nums font-mono">165 ADC</div>
+                <div id="sensorGasInd" class="sensor-status-indicator">Normal (&lt; 250)</div>
+              </div>
+
+              <!-- 4. Flame -->
+              <div class="sensor-card">
+                <div class="sensor-card-top">
+                  <span class="sensor-label"><span>🔥</span> Flame</span>
+                  <span class="sensor-icon">🔥</span>
+                </div>
+                <div id="sensorFlameVal" class="sensor-val font-mono">Safe</div>
+                <div id="sensorFlameInd" class="sensor-status-indicator">Optical Normal</div>
+              </div>
+
+              <!-- 5. Vibration -->
+              <div class="sensor-card">
+                <div class="sensor-card-top">
+                  <span class="sensor-label"><span>📳</span> Vibration</span>
+                  <span class="sensor-icon">📳</span>
+                </div>
+                <div id="sensorVibVal" class="sensor-val font-mono">Safe</div>
+                <div id="sensorVibInd" class="sensor-status-indicator">Structural Stable</div>
+              </div>
+
+            </div>
+
+            <!-- Mine Areas Summary List -->
+            <div class="section-heading-wrap">
+              <h3 class="section-heading">
+                <span>🗺️</span>
+                <span>Mine Sectors &amp; Deployment</span>
+              </h3>
+              <button class="btn btn-secondary btn-sm" onclick="window.switchTab('areas')">
+                View All Areas
+              </button>
+            </div>
+
+            <div id="dashboardAreasSummary" class="areas-summary-list">
+              <!-- Dynamically populated by script.js -->
+            </div>
+
+          </section>
+
+          <!-- ================================================================
+               SECTION 2: WORKERS
+               ================================================================ -->
+          <section id="view-workers" class="view-section">
+            
+            <div class="section-heading-wrap" style="margin-top: 0;">
+              <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #ffffff;">Workers Management</h2>
+                <p id="workersInsideHeader" style="font-size: 0.8125rem; color: #fbbf24; font-weight: 700;">
+                  24 People Inside
+                </p>
+              </div>
+              <button id="btnAddWorker" class="btn btn-primary">
+                + Add Worker
+              </button>
+            </div>
+
+            <!-- Toolbar & Search -->
+            <div class="workers-toolbar">
+              <input type="text" id="workerSearchInput" class="search-input" placeholder="Search by name, ID, RFID, or area..." />
+              <div style="font-size: 0.75rem; color: var(--text-muted);">
+                Tap RFID button on any card to simulate worker enter/exit
+              </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+              <button class="filter-tab active" data-filter="all">All Workers</button>
+              <button class="filter-tab" data-filter="in">🟢 Inside Mine Only</button>
+              <button class="filter-tab" data-filter="out">🔴 Outside Shift</button>
+              <button class="filter-tab" data-filter="area:Main Shaft">Main Shaft</button>
+              <button class="filter-tab" data-filter="area:Underground Zone B">Zone B</button>
+              <button class="filter-tab" data-filter="area:Processing Area">Processing</button>
+            </div>
+
+            <!-- Workers Cards Grid -->
+            <div id="workersGrid" class="workers-grid">
+              <!-- Dynamically populated -->
+            </div>
+
+          </section>
+
+          <!-- ================================================================
+               SECTION 3: MINE AREAS
+               ================================================================ -->
+          <section id="view-areas" class="view-section">
+            
+            <div class="section-heading-wrap" style="margin-top: 0;">
+              <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #ffffff;">Mine Areas</h2>
+                <p style="font-size: 0.8125rem; color: var(--text-muted);">
+                  Monitored underground seams, shafts, and processing facilities
+                </p>
+              </div>
+              <button id="btnAddArea" class="btn btn-primary">
+                + Add Area
+              </button>
+            </div>
+
+            <!-- Areas Grid -->
+            <div id="areasGrid" class="areas-grid" style="margin-top: 1rem;">
+              <!-- Dynamically populated -->
+            </div>
+
+          </section>
+
+          <!-- ================================================================
+               SECTION 4: ALERTS
+               ================================================================ -->
+          <section id="view-alerts" class="view-section">
+            
+            <div class="section-heading-wrap" style="margin-top: 0;">
+              <div>
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: #ffffff;">Safety Alerts Log</h2>
+                <p style="font-size: 0.8125rem; color: var(--text-muted);">
+                  Chronological record of atmospheric hazards, threshold alarms &amp; entries
+                </p>
+              </div>
+              <button id="btnClearAlerts" class="btn btn-secondary btn-sm">
+                Clear Log
+              </button>
+            </div>
+
+            <div id="alertsListContainer" class="alerts-list" style="margin-top: 1rem;">
+              <!-- Dynamically populated -->
+            </div>
+
+          </section>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ====================================================================
+         MOBILE BOTTOM NAVIGATION (Fixed at bottom on mobile)
+         Only 4 main tabs: Dashboard, Workers, Mine Areas, Alerts
+         ==================================================================== -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-nav-target="dashboard">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </button>
+
+      <button class="nav-item" data-nav-target="workers">
+        <span class="nav-icon">👷</span>
+        <span>Workers</span>
+      </button>
+
+      <button class="nav-item" data-nav-target="areas">
+        <span class="nav-icon">🗺️</span>
+        <span>Mine Areas</span>
+      </button>
+
+      <button class="nav-item" data-nav-target="alerts">
+        <span class="nav-icon">⚠️</span>
+        <span>Alerts</span>
+        <span class="nav-badge" style="display: none;">0</span>
+      </button>
+    </nav>
+
+    <!-- ====================================================================
+         MODALS
+         ==================================================================== -->
+
+    <!-- 1. Add Worker Modal -->
+    <div id="modalAddWorker" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">+ Add New Worker</h3>
+          <button class="modal-close" onclick="window.closeModal('modalAddWorker')">&times;</button>
+        </div>
+        <form id="formAddWorker">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Worker Name *</label>
+              <input type="text" id="inputWorkerName" class="form-control" placeholder="e.g. Rajesh Kumar" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Employee ID *</label>
+              <input type="text" id="inputWorkerId" class="form-control" placeholder="e.g. W033" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">RFID Card UID *</label>
+              <input type="text" id="inputWorkerRfid" class="form-control font-mono" placeholder="e.g. 0x4A89C1B2" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Assigned Mine Area *</label>
+              <select id="inputWorkerArea" class="form-control">
+                <!-- Dynamically populated from Areas -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number (Optional)</label>
+              <input type="tel" id="inputWorkerPhone" class="form-control" placeholder="+91 98400 00000" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="window.closeModal('modalAddWorker')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Worker</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. Add Area Modal -->
+    <div id="modalAddArea" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">+ Add Mine Area</h3>
+          <button class="modal-close" onclick="window.closeModal('modalAddArea')">&times;</button>
+        </div>
+        <form id="formAddArea">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Area Name *</label>
+              <input type="text" id="inputAreaName" class="form-control" placeholder="e.g. Underground Zone C" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea id="inputAreaDesc" class="form-control" rows="2" placeholder="Brief description of ventilation, tunnel depth, or machinery."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Area Type</label>
+              <input type="text" id="inputAreaType" class="form-control" placeholder="e.g. Deep Extraction, Hoist Shaft, Processing" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="window.closeModal('modalAddArea')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Area</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3. Quick RFID Scan Simulator Modal -->
+    <div id="modalQuickRfid" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">⚡ Fast RFID Card Scanner</h3>
+          <button class="modal-close" onclick="window.closeModal('modalQuickRfid')">&times;</button>
+        </div>
+        <form id="formQuickRfid">
+          <div class="modal-body">
+            <p style="font-size: 0.8125rem; color: var(--text-muted);">
+              Enter an RFID card UID or Employee ID to simulate an entry/exit swipe at the mine entrance terminal:
+            </p>
+            <div class="form-group">
+              <label class="form-label">Scan / Input RFID UID or ID</label>
+              <input type="text" id="inputRfidScanUid" class="form-control font-mono" placeholder="e.g. 0x4A89C1B2 or W001" required />
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-dim);">
+              Tip: You can also tap the &ldquo;⚡ Tap RFID&rdquo; button directly on any worker card!
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="window.closeModal('modalQuickRfid')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Simulate Swipe</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 4. Area Details Inspection Modal -->
+    <div id="modalInspectArea" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="inspectAreaTitle" class="modal-title">Area Details</h3>
+          <button class="modal-close" onclick="window.closeModal('modalInspectArea')">&times;</button>
+        </div>
+        <div id="inspectAreaBody" class="modal-body">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Adafruit IO Config Modal -->
+    <div id="modalAioConfig" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">⚙️ Adafruit IO Configuration</h3>
+          <button class="modal-close" onclick="window.closeModal('modalAioConfig')">&times;</button>
+        </div>
+        <form id="formAioConfig">
+          <div class="modal-body">
+            <p style="font-size: 0.8125rem; color: var(--text-muted);">
+              Connect your Arduino UNO &amp; ESP8266 live hardware to retrieve sensor feeds.
+            </p>
+            <div class="form-group">
+              <label class="form-label">Adafruit IO Username</label>
+              <input type="text" id="inputAioUser" class="form-control" placeholder="e.g. your_adafruit_username" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Active AIO Key</label>
+              <input type="password" id="inputAioKey" class="form-control font-mono" placeholder="aio_xxxxxxxxxxxxxxxxxxxxxxxx" required />
+            </div>
+            <div style="background: var(--bg-app); border: 1px solid var(--border-subtle); border-radius: 0.5rem; padding: 0.75rem; font-size: 0.75rem; color: var(--text-muted);">
+              <span style="color: #fbbf24; font-weight: 700; display: block; margin-bottom: 0.25rem;">6 Feeds Used:</span>
+              <code>temperature</code>, <code>humidity</code>, <code>gas</code>, <code>flame</code>, <code>vibration</code>, <code>system-status</code>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="window.closeModal('modalAioConfig')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save &amp; Connect</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 6. Confirmation Modal: Clear Emergency Alert -->
+    <div id="modalConfirmClearEmergency" class="modal-overlay">
+      <div class="modal-card modal-confirm-card">
+        <div class="modal-header" style="border-bottom-color: rgba(239, 68, 68, 0.3);">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 1.25rem;">⚠️</span>
+            <h3 class="modal-title" style="color: #f87171;">Clear emergency alert?</h3>
+          </div>
+          <button class="modal-close" onclick="window.closeModal('modalConfirmClearEmergency')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 0.9375rem; color: #ffffff; line-height: 1.5;">
+            Are you sure you want to end the active emergency evacuation and reset the mine monitoring system back to normal?
+          </p>
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 0.5rem; padding: 0.75rem; font-size: 0.8125rem; color: #6ee7b7;">
+            🟢 Upon confirmation, the audible siren will cease, the emergency banner will clear, and the Emergency Alert button will return to <strong>SYSTEM NORMAL</strong>.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="window.closeModal('modalConfirmClearEmergency')">
+            Cancel
+          </button>
+          <button type="button" id="btnConfirmClearAlert" class="btn btn-primary" style="background: #10b981; border-color: #10b981; color: #ffffff; font-weight: 800;">
+            Clear Alert
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" style="position: fixed; bottom: 5rem; right: 1rem; z-index: 70; max-width: 320px;"></div>
+
+    <!-- Script Entry Point -->
+    <script type="module" src="/script.js"></script>
+  </body>
+</html>

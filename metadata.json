@@ -1,0 +1,6 @@
+{
+  "name": "Factory Safety Monitor",
+  "description": "IoT-Based Factory Safety & Environmental Monitoring web dashboard connecting to Adafruit IO for Arduino UNO and ESP8266 sensor telemetry.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
